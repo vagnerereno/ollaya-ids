@@ -1,0 +1,46 @@
+ARG OLLAYA_IMAGE=ghcr.io/ollaya-dev/ollaya:cuda
+FROM ${OLLAYA_IMAGE} AS ollaya-runtime
+
+FROM nvidia/cuda:13.0.2-devel-ubuntu24.04
+
+ARG KEV_REF=kev-1.0
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    UV_LINK_MODE=copy \
+    UV_CACHE_DIR=/root/.cache/uv \
+    HF_HOME=/root/.cache/huggingface \
+    OLLAYA_DEVICE=cuda \
+    NVIDIA_DRIVER_CAPABILITIES=compute,utility
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        ca-certificates \
+        curl \
+        git \
+        jq \
+        python3 \
+        python3-pip \
+        python3-venv \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.local/bin:${PATH}"
+
+COPY --from=ollaya-runtime /usr/bin/ollaya /usr/bin/ollaya
+COPY --from=ollaya-runtime /usr/lib/ollaya /usr/lib/ollaya
+
+WORKDIR /workspace
+COPY pyproject.toml README.md ./
+COPY configs ./configs
+COPY src ./src
+
+RUN uv venv --python 3.13 /opt/ollaya-ids-venv \
+    && uv pip install --python /opt/ollaya-ids-venv/bin/python -e ".[xgboost]"
+
+RUN git clone --branch "${KEV_REF}" --depth 1 https://github.com/jaredpalmer/kev.git /opt/kev \
+    && uv sync --project /opt/kev --extra serve --python 3.13
+
+ENV PATH="/opt/ollaya-ids-venv/bin:${PATH}"
+
+CMD ["bash"]

@@ -1,0 +1,40 @@
+seed: 42
+
+dataset:
+  path: data/ERENO-2.0-100K.csv
+  section: csv
+  label_column: class
+  feature_profile: decision
+  drop_conflicting: true
+  drop_duplicates: true
+
+split:
+  strategy: stratified
+  train_size: 0.70
+  validation_size: 0.15
+  test_size: 0.15
+
+baseline:
+  random_forest:
+    estimators: 500
+    min_samples_leaf: 1
+    max_features: sqrt
+    jobs: -1
+  xgboost:
+    estimators: 700
+    max_depth: 8
+    learning_rate: 0.08
+    subsample: 0.85
+    colsample_bytree: 0.85
+    device: cuda
+
+decision_model:
+  base_url: http://127.0.0.1:11435
+  endpoint: /v1/systemone
+  api_key: local
+  model: kev:4b
+  timeout_seconds: 60
+  max_test_samples: 2000
+  state_precision: 6
+
+output_dir: artifacts

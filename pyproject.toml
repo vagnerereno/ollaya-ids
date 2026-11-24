@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ollaya-ids"
+version = "0.1.0"
+description = "Reproducible evaluation of decision models for IEC 61850 intrusion detection"
+requires-python = ">=3.10"
+dependencies = [
+    "joblib>=1.4,<2",
+    "numpy>=1.26,<3",
+    "pandas>=2.2,<3",
+    "PyYAML>=6,<7",
+    "requests>=2.32,<3",
+    "scikit-learn>=1.5,<2",
+]
+
+[project.optional-dependencies]
+xgboost = ["xgboost>=2.1,<4"]
+explain = ["matplotlib>=3.9,<4", "shap>=0.47,<1"]
+dev = ["pytest>=8,<9", "ruff>=0.9,<1"]
+
+[project.scripts]
+ollaya-ids = "ollaya_ids.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

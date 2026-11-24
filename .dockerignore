@@ -1,0 +1,11 @@
+.git
+.idea
+.venv
+.pytest_cache
+.ruff_cache
+artifacts
+runs
+data
+external
+__pycache__
+*.pyc
